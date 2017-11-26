@@ -17,30 +17,7 @@ public static function search($name){
 		':SEARCH'=>"%".$name."%"
 	));
 }
-public function login ($login,$password){
-	$sql =new Sql();
-	
-	$results = $sql -> select("SELECT * FROM tb_usuarios WHERE name=:NAME AND password =:PASSWORD", array(
-		":NAME"=>$login,
-		":PASSWORD"=>$password
-	));
-	
-	if (count($results) > 0 ){
-		
-		$row = $results[0];
-		
-		$this->setID($row['ID']);
-		$this->setName($row['name']);
-		$this->setDate(new DateTime($row['date_include']));
-		$this->setPassword($row['password']);
-		
-	} else{
-		throw new Exception("Login e/ou Senha Invalidos");
-		
-	}
-	
-	
-}
+
 	
 public function getID(){
 	return $this->ID;
@@ -76,17 +53,53 @@ public function loadById($id){
 	));
 	
 	if (count($results) > 0 ){
-		
-		$row = $results[0];
-		
-		$this->setID($row['ID']);
-		$this->setName($row['name']);
-		$this->setDate(new DateTime($row['date_include']));
-		$this->setPassword($row['password']);
+				
+		$this->setData($results[0]);
 		
 	}   
 }
+	
+	
+public function login ($login,$password){
+	
+	$sql =new Sql();
+	
+	$results = $sql -> select("SELECT * FROM tb_usuarios WHERE name=:NAME AND password =:PASSWORD", array(
+		":NAME"=>$login,
+		":PASSWORD"=>$password
+	));
+	
+	if (count($results) > 0 ){
+		
 
+		$this->setData($results[0]);		
+	} else{
+		throw new Exception("Login e/ou Senha Invalidos");	
+	}
+}
+public function setData($data){
+	
+		$this->setID($data['ID']);
+		$this->setName($data['name']);
+		$this->setDate(new DateTime($data['date_include']));
+		$this->setPassword($data['password']);
+}
+	
+public function insert(){
+	$sql= new Sql();
+	$results =$sql->select("CALL sp_usuarios_insert(:NOME,:PASSWORD)",array(':NOME'=>$this->getName(),
+	':PASSWORD'=>$this->getPassword()
+	
+	));
+		
+	if(count($results)>0){
+		
+		$this->setData($results[0]);
+	}
+	
+}
+	
+	
 public function __toString(){
 	
 	return json_encode(array(
